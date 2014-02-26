@@ -20,9 +20,12 @@ class ControllerBase
   # later raise an error if the developer tries to double render
   def render_content(content, type)
     raise "Already Rendered" if already_rendered?
+    flash.clear_messages
+
     @res.body = content
     @res.content_type = type
-    session.store_session(@res)
+
+    store_cookies(@res)
     @already_built_response = @res
   end
 
@@ -34,9 +37,12 @@ class ControllerBase
   # set the response status code and header
   def redirect_to(url)
     raise "Already Rendered" if already_rendered?
+    flash.clear_messages
+
     @res.status = 302
     @res["location"] = url
-    session.store_session(@res)
+
+    store_cookies(@res)
     @already_built_response = @res
   end
 
@@ -52,6 +58,15 @@ class ControllerBase
   # method exposing a `Session` object
   def session
     @session ||= Session.new(@req)
+  end
+
+  def flash
+    @flash ||= Flash.new(@req)
+  end
+
+  def store_cookies(res)
+    session.store_session(res)
+    flash.store_session(res)
   end
 
   # use this with the router to call action_name (:index, :show, :create...)
