@@ -10,6 +10,7 @@ class Session
     end
 
     @value ||= {}
+    @value[:csrf_token] ||= generate_csrf_token
   end
 
   def [](key)
@@ -20,9 +21,14 @@ class Session
     @value[key] = val
   end
 
+  def generate_csrf_token
+    SecureRandom::urlsafe_base64(16)
+  end
+
   # serialize the hash into json and save in a cookie
   # add to the responses cookies
   def store_session(res)
+    @value[:csrf_token] = generate_csrf_token
     res.cookies << WEBrick::Cookie.new('_rails_lite_app', @value.to_json)
   end
 end

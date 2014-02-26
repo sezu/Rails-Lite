@@ -69,8 +69,16 @@ class ControllerBase
     flash.store_session(res)
   end
 
+  def form_authenticty_token
+    session.value[:csrf_token]
+  end
+
   # use this with the router to call action_name (:index, :show, :create...)
-  def invoke_action(name)
+  def invoke_action(name, http_method)
+    if [:put, :patch, :post].include?(http_method)
+      raise "CSRF Invalid" unless form_authenticity_token == @params[:authenticity_token]
+    end
+
     send(name)
     render(name) unless already_rendered?
   end

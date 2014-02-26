@@ -23,7 +23,8 @@ class Route
       route_params[name] = match[name]
     end
 
-    @controller_class.new(req, res, route_params).invoke_action(@action_name)
+    @controller_class.new(req, res, route_params)
+                     .invoke_action(@action_name, http_method)
   end
 end
 
